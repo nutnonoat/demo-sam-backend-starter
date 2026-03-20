@@ -32,7 +32,7 @@ Parameters:
   RdsHost:
     Type: String
     Default: "your-rds-proxy-endpoint.rds.amazonaws.com"
-    Description: RDS Proxy endpoint (provided by infra team)
+    Description: RDS endpoint (provided by infra team)
   RdsPort:
     Type: String
     Default: "5432"
@@ -95,6 +95,11 @@ Resources:
           "username": "${RdsUsername}",
           "password": "${RdsPassword}"
         }
+      Tags:
+        - Key: project
+          Value: !Ref Project
+        - Key: env
+          Value: !Ref Environment
 
   # ── Security Group for Lambda ──
   LambdaSecurityGroup:
