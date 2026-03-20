@@ -119,31 +119,23 @@ Resources:
       SupportedIdentityProviders:
         - COGNITO
 
-  # ── API Gateway (HTTP API) ──
+  # ── API Gateway (REST API) ──
   ApiGateway:
-    Type: AWS::Serverless::HttpApi
+    Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Environment
-      CorsConfiguration:
-        AllowOrigins:
-          - !Ref CorsAllowOrigin
-        AllowMethods:
-          - GET
-          - POST
-          - PUT
-          - DELETE
-          - OPTIONS
-        AllowHeaders:
-          - Authorization
-          - Content-Type
-        MaxAge: 3600
+      Cors:
+        AllowOrigin: !Sub "'${CorsAllowOrigin}'"
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Authorization,Content-Type'"
+        MaxAge: "'3600'"
       Auth:
         DefaultAuthorizer: CognitoLambdaAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
         Authorizers:
           CognitoLambdaAuthorizer:
+            FunctionPayloadType: REQUEST
             FunctionArn: !GetAtt AuthorizerFunction.Arn
-            AuthorizerPayloadFormatVersion: "2.0"
-            EnableSimpleResponses: true
             Identity:
               Headers:
                 - Authorization
@@ -192,33 +184,33 @@ Resources:
               Resource: !Ref RdsSecret
       Events:
         ListItems:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref ApiGateway
+            RestApiId: !Ref ApiGateway
             Path: /items
             Method: GET
         GetItem:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref ApiGateway
+            RestApiId: !Ref ApiGateway
             Path: /items/{id}
             Method: GET
         CreateItem:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref ApiGateway
+            RestApiId: !Ref ApiGateway
             Path: /items
             Method: POST
         UpdateItem:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref ApiGateway
+            RestApiId: !Ref ApiGateway
             Path: /items/{id}
             Method: PUT
         DeleteItem:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref ApiGateway
+            RestApiId: !Ref ApiGateway
             Path: /items/{id}
             Method: DELETE
 

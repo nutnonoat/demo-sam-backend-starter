@@ -113,8 +113,8 @@ def delete_item(conn, item_id):
 
 # ── Lambda handler ──
 def handler(event, context):
-    method = event.get("requestContext", {}).get("http", {}).get("method", "")
-    path = event.get("rawPath", "")
+    method = event.get("httpMethod", "")
+    path = event.get("path", "")
     path_params = event.get("pathParameters") or {}
     query_params = event.get("queryStringParameters") or {}
 
