@@ -123,6 +123,9 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Environment
+      Tags:
+        project: !Ref Project
+        environment: !Ref Environment
       Cors:
         AllowOrigin: !Sub "'${CorsAllowOrigin}'"
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
