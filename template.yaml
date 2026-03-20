@@ -221,7 +221,7 @@ Outputs:
     Description: Cognito App Client ID for frontend integration
     Value: !Ref CognitoAppClient
   LambdaSecurityGroupId:
-    Description: Lambda security group ID (infra team must allow this in RDS/Proxy SG)
+    Description: Lambda security group ID (infra team must allow this in RDS SG)
     Value: !Ref LambdaSecurityGroup
   RdsSecretArn:
     Description: Secrets Manager ARN for RDS credentials (update values via console or CLI)
