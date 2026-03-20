@@ -123,14 +123,6 @@ Example:
 
 The script tests all CRUD operations, 404 handling, and authentication/authorization (8 tests total).
 
-### Step 7: Redeploy after code changes
-
-```bash
-sam build --use-container && sam deploy
-```
-
-To change parameter values later, run `sam build --use-container && sam deploy --guided` again.
-
 ## Building your own API
 
 The template includes a working CRUD API for an `items` table as a starting point. To build your own:
@@ -139,6 +131,14 @@ The template includes a working CRUD API for an `items` table as a starting poin
 2. Add your route handlers in `backend/src/app.py`
 3. Add corresponding API Gateway events in `template.yaml` under `BackendFunction.Events`
 4. Add any new Python dependencies to `backend/src/requirements.txt`
+
+After making changes, redeploy:
+
+```bash
+sam build --use-container && sam deploy
+```
+
+To change parameter values, run `sam build --use-container && sam deploy --guided` again.
 
 ## API routes
 
