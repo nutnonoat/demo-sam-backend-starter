@@ -102,12 +102,12 @@ aws secretsmanager update-secret \
    ```
 2. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
 
-### Step 6: Write your code
+### Step 6: Build your own API
 
-Replace the sample code in `backend/src/app.py` with your application logic:
+The template includes a working CRUD API for an `items` table as a starting point. To build your own:
 
-1. Update the table schema in `_init_table()` or replace with a migration tool
-2. Add your routes in the `handler()` function
+1. Add your tables/schema in `_init_table()` or replace with a migration tool
+2. Add your route handlers in `backend/src/app.py`
 3. Add corresponding API Gateway events in `template.yaml` under `BackendFunction.Events`
 4. Add any new Python dependencies to `backend/src/requirements.txt`
 
