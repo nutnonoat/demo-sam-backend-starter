@@ -1,7 +1,7 @@
 .PHONY: build deploy delete
 
 build:
-	sam build
+	sam build --use-container
 
 deploy: build
 	sam deploy
