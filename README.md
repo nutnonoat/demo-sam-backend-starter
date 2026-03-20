@@ -34,7 +34,7 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 
 | Parameter | Required | Default | Description |
 |---|---|---|---|
-| `AppName` | Yes | — | Application name for resource naming |
+| `Project` | Yes | — | Application name for resource naming |
 | `Environment` | No | `dev` | `dev`, `staging`, or `prod` |
 | `CognitoUserPoolId` | Yes | — | Shared Cognito User Pool ID |
 | `CognitoUserPoolArn` | Yes | — | Shared Cognito User Pool ARN |
@@ -84,7 +84,7 @@ make deploy-guided
 SAM will prompt you for each parameter one by one:
 
 ```
-Parameter AppName []: my-app-name
+Parameter Project []: my-app-name
 Parameter Environment [dev]: dev
 Parameter CognitoUserPoolId []: ap-southeast-1_AbCdEfG
 Parameter CognitoUserPoolArn []: arn:aws:cognito-idp:ap-southeast-1:123456789012:userpool/ap-southeast-1_AbCdEfG
@@ -153,7 +153,7 @@ make deploy
 Edit `samconfig.toml` and fill in the parameter values:
 
 ```toml
-parameter_overrides = "AppName=\"my-app\" Environment=\"dev\" CognitoUserPoolId=\"ap-southeast-1_XXXXX\" ..."
+parameter_overrides = "Project=\"my-app\" Environment=\"dev\" CognitoUserPoolId=\"ap-southeast-1_XXXXX\" ..."
 ```
 
 ### 2. Build & deploy
@@ -220,7 +220,7 @@ demo-sam-backend-starter/
 
 - **CORS**: Default `AllowOrigin` is `*` which works for development. When Cognito auth is used from a browser, you **must** set this to the actual frontend domain (e.g., `https://main.d1234.amplifyapp.com`), because browsers reject wildcard origins with `Authorization` headers.
 - **JWT verification**: The authorizer decodes and validates JWT claims (issuer, expiry, group) but does **not** perform RS256 signature verification. For production, add a library like `python-jose` or `PyJWT` with cryptographic verification against the JWKS endpoint.
-- **Secrets Manager**: The template creates a secret named `<AppName>-<Environment>/rds-credentials` with the RDS connection details you provide as parameters. You can also update the secret values later via the console or CLI: `aws secretsmanager update-secret --secret-id <AppName>-<Environment>/rds-credentials --secret-string '{"host":"...","port":5432,"dbname":"...","username":"...","password":"..."}'`
+- **Secrets Manager**: The template creates a secret named `<Project>-<Environment>/rds-credentials` with the RDS connection details you provide as parameters. You can also update the secret values later via the console or CLI: `aws secretsmanager update-secret --secret-id <Project>-<Environment>/rds-credentials --secret-string '{"host":"...","port":5432,"dbname":"...","username":"...","password":"..."}'`
 - **DB table**: The `items` table is auto-created on first request. For production, use a migration tool.
 - **Connection management**: Each Lambda invocation opens and closes a DB connection. For high-throughput, RDS Proxy handles connection pooling on the database side.
 

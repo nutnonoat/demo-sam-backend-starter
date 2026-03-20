@@ -7,7 +7,7 @@ Description: >
 # Parameters
 # ──────────────────────────────────────────────
 Parameters:
-  AppName:
+  Project:
     Type: String
     Description: Application name used for resource naming
   Environment:
@@ -69,11 +69,11 @@ Globals:
     Architectures:
       - arm64
     Tags:
-      project: !Ref AppName
+      project: !Ref Project
       env: !Ref Environment
     Environment:
       Variables:
-        APP_NAME: !Ref AppName
+        APP_NAME: !Ref Project
         ENVIRONMENT: !Ref Environment
 
 # ──────────────────────────────────────────────
@@ -85,8 +85,8 @@ Resources:
   RdsSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub "${AppName}-${Environment}/rds-credentials"
-      Description: !Sub "RDS credentials for ${AppName}-${Environment}"
+      Name: !Sub "${Project}-${Environment}/rds-credentials"
+      Description: !Sub "RDS credentials for ${Project}-${Environment}"
       SecretString: !Sub |
         {
           "host": "${RdsHost}",
@@ -100,16 +100,16 @@ Resources:
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub "${AppName}-${Environment}-lambda-sg"
+      GroupDescription: !Sub "${Project}-${Environment}-lambda-sg"
       VpcId: !Ref VpcId
       SecurityGroupEgress:
         - IpProtocol: "-1"
           CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
-          Value: !Sub "${AppName}-${Environment}-lambda-sg"
+          Value: !Sub "${Project}-${Environment}-lambda-sg"
         - Key: project
-          Value: !Ref AppName
+          Value: !Ref Project
         - Key: env
           Value: !Ref Environment
 
@@ -117,7 +117,7 @@ Resources:
   CognitoAppClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Sub "${AppName}-${Environment}"
+      ClientName: !Sub "${Project}-${Environment}"
       UserPoolId: !Ref CognitoUserPoolId
       GenerateSecret: false
       ExplicitAuthFlows:
@@ -151,7 +151,7 @@ Resources:
   AuthorizerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "${AppName}-${Environment}-authorizer"
+      FunctionName: !Sub "${Project}-${Environment}-authorizer"
       CodeUri: authorizer/src/
       Handler: authorizer.handler
       MemorySize: 128
@@ -169,7 +169,7 @@ Resources:
   BackendFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "${AppName}-${Environment}-api"
+      FunctionName: !Sub "${Project}-${Environment}-api"
       CodeUri: backend/src/
       Handler: app.handler
       VpcConfig:
