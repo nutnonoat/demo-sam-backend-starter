@@ -28,7 +28,6 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 - VPC endpoints: Secrets Manager
 - Cognito User Pool with app-specific group created
 - Per-app database user and credentials (handed to app team securely)
-- RDS security group allows inbound from app Lambda security group (after first deploy)
 
 ## Prerequisites (local machine)
 
@@ -101,8 +100,7 @@ aws secretsmanager update-secret \
    ```bash
    aws cloudformation describe-stacks --stack-name <your-stack-name> --query "Stacks[0].Outputs"
    ```
-2. Send `LambdaSecurityGroupId` to infra team - they must allow it inbound on the RDS security group (port 5432)
-3. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
+2. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
 
 ### Step 6: Write your code
 
