@@ -5,7 +5,7 @@ A SAM-based backend starter kit for teams modernizing to serverless on AWS.
 ## Architecture
 
 ```
-Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (via RDS Proxy)
+Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (via RDS)
               ↓
        Lambda Authorizer → validates Cognito JWT + group membership
 ```
@@ -24,11 +24,11 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 ## Prerequisites (infra team provides)
 
 - VPC with private subnets
-- RDS Proxy + RDS PostgreSQL
-- Secrets Manager secret with DB credentials and proxy endpoint (standard RDS format: `host`, `port`, `username`, `password`, `dbname`) — OR provide credentials as template parameters and the template creates the secret
+- RDS + RDS PostgreSQL
+- Secrets Manager secret with DB credentials and RDS endpoint (standard RDS format: `host`, `port`, `username`, `password`, `dbname`) — OR provide credentials as template parameters and the template creates the secret
 - VPC endpoints: Secrets Manager
 - Cognito User Pool with app-specific group created
-- RDS/Proxy security group allows inbound from app Lambda security group (output after first deploy)
+- RDS security group allows inbound from app Lambda security group (output after first deploy)
 
 ## Parameters
 
@@ -41,7 +41,7 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 | `AllowedCognitoGroup` | Yes | — | Cognito group allowed to access this app |
 | `VpcId` | Yes | — | VPC ID for Lambda |
 | `PrivateSubnetIds` | Yes | — | Comma-separated private subnet IDs |
-| `RdsHost` | No | `your-rds-proxy-endpoint...` | RDS Proxy endpoint |
+| `RdsHost` | No | `your-rds-endpoint...` | RDS endpoint |
 | `RdsPort` | No | `5432` | Database port |
 | `RdsDbName` | No | `mydb` | Database name |
 | `RdsUsername` | No | `dbadmin` | Database username (NoEcho) |
@@ -70,7 +70,7 @@ Before deploying, request the following from your infrastructure team:
 | Cognito group name for your app | `my-app-users` |
 | VPC ID | `vpc-0abc1234def56789` |
 | Private subnet IDs (2+) | `subnet-aaa111,subnet-bbb222` |
-| RDS Proxy endpoint | `my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com` |
+| RDS endpoint | `my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com` |
 | Database name | `mydb` |
 | Database username | `dbadmin` |
 | Database password | *(provided securely)* |
@@ -91,7 +91,7 @@ Parameter CognitoUserPoolArn []: arn:aws:cognito-idp:ap-southeast-1:123456789012
 Parameter AllowedCognitoGroup []: my-app-users
 Parameter VpcId []: vpc-0abc1234def56789
 Parameter PrivateSubnetIds []: subnet-aaa111,subnet-bbb222
-Parameter RdsHost [your-rds-proxy-endpoint.rds.amazonaws.com]: my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com
+Parameter RdsHost [your-rds-endpoint.rds.amazonaws.com]: my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com
 Parameter RdsDbName [mydb]: mydb
 Parameter RdsUsername [dbadmin]: dbadmin
 Parameter RdsPassword [changeme]: ********
@@ -114,7 +114,7 @@ To change parameter values later, run `make deploy-guided` again — it shows cu
    ```bash
    aws cloudformation describe-stacks --stack-name my-app-name-dev --query "Stacks[0].Outputs"
    ```
-2. Send `LambdaSecurityGroupId` to infra team — they must allow it inbound on the RDS/Proxy security group (port 5432)
+2. Send `LambdaSecurityGroupId` to infra team — they must allow it inbound on the RDS security group (port 5432)
 3. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
 
 ### Step 6: Write your code
@@ -166,7 +166,7 @@ make deploy          # subsequent deploys
 ### 3. Post-deploy
 
 1. Note the `LambdaSecurityGroupId` from stack outputs
-2. Ask infra team to allow this SG inbound on the RDS/Proxy security group (port 5432)
+2. Ask infra team to allow this SG inbound on the RDS security group (port 5432)
 
 ### 4. Test
 
@@ -222,7 +222,7 @@ demo-sam-backend-starter/
 - **JWT verification**: The authorizer decodes and validates JWT claims (issuer, expiry, group) but does **not** perform RS256 signature verification. For production, add a library like `python-jose` or `PyJWT` with cryptographic verification against the JWKS endpoint.
 - **Secrets Manager**: The template creates a secret named `<Project>-<Environment>/rds-credentials` with the RDS connection details you provide as parameters. You can also update the secret values later via the console or CLI: `aws secretsmanager update-secret --secret-id <Project>-<Environment>/rds-credentials --secret-string '{"host":"...","port":5432,"dbname":"...","username":"...","password":"..."}'`
 - **DB table**: The `items` table is auto-created on first request. For production, use a migration tool.
-- **Connection management**: Each Lambda invocation opens and closes a DB connection. For high-throughput, RDS Proxy handles connection pooling on the database side.
+- **Connection management**: Each Lambda invocation opens and closes a DB connection. For high-throughput, RDS handles connection pooling on the database side.
 
 ## Cleanup
 
