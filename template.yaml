@@ -52,7 +52,7 @@ Globals:
       - arm64
     Tags:
       project: !Ref Project
-      env: !Ref Environment
+      environment: !Ref Environment
     Environment:
       Variables:
         APP_NAME: !Ref Project
@@ -80,7 +80,7 @@ Resources:
       Tags:
         - Key: project
           Value: !Ref Project
-        - Key: env
+        - Key: environment
           Value: !Ref Environment
 
   # ── Security Group for Lambda ──
@@ -95,7 +95,7 @@ Resources:
       Tags:
         - Key: project
           Value: !Ref Project
-        - Key: env
+        - Key: environment
           Value: !Ref Environment
 
   # ── Cognito App Client (per-app, in shared User Pool) ──
