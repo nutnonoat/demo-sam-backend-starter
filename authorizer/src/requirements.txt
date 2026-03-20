@@ -1,1 +1,1 @@
-# No external dependencies — uses stdlib only
+python-jose[cryptography]

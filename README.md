@@ -179,7 +179,7 @@ demo-sam-backend-starter/
 ## Important notes
 
 - **CORS**: Default `AllowOrigin` is `*` which works for development. When Cognito auth is used from a browser, you **must** set this to the actual frontend domain (e.g., `https://main.d1234.amplifyapp.com`), because browsers reject wildcard origins with `Authorization` headers.
-- **JWT verification**: The authorizer decodes and validates JWT claims (issuer, expiry, group) but does **not** perform RS256 signature verification. For production, add a library like `python-jose` or `PyJWT` with cryptographic verification against the JWKS endpoint.
+- **JWT verification**: The authorizer verifies JWT signature (RS256) against Cognito's JWKS keys, validates issuer, expiration, and group membership.
 - **Secrets Manager**: The template creates a secret named `<Project>-<Environment>/rds-credentials` with placeholder values. You must update it with actual credentials after deploy (see Step 4).
 - **DB table**: The `items` table is auto-created on first request. For production, use a migration tool.
 - **Connection management**: Each Lambda invocation opens and closes a DB connection.
