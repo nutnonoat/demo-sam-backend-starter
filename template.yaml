@@ -40,6 +40,11 @@ Parameters:
     Type: Number
     Default: 512
 
+  SecretsExtensionLayerArn:
+    Type: String
+    Default: "arn:aws:lambda:ap-southeast-1:044395824272:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:61"
+    Description: ARN of the AWS Parameters and Secrets Lambda Extension layer (region-specific, see https://docs.aws.amazon.com/systems-manager/latest/userguide/ps-integration-lambda-extensions.html)
+
 # ──────────────────────────────────────────────
 # Globals
 # ──────────────────────────────────────────────
@@ -162,7 +167,7 @@ Resources:
         Variables:
           RDS_SECRET_ARN: !Ref RdsSecret
       Layers:
-        - !Sub "arn:aws:lambda:${AWS::Region}:133490698326:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:14"
+        - !Ref SecretsExtensionLayerArn
       Policies:
         - VPCAccessPolicy: {}
         - Version: "2012-10-17"
