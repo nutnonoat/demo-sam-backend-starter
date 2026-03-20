@@ -29,24 +29,6 @@ Parameters:
   PrivateSubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     Description: Private subnet IDs for Lambda (provided by infra team)
-  RdsHost:
-    Type: String
-    Default: "your-rds-proxy-endpoint.rds.amazonaws.com"
-    Description: RDS endpoint (provided by infra team)
-  RdsPort:
-    Type: String
-    Default: "5432"
-  RdsDbName:
-    Type: String
-    Default: "appdb"
-  RdsUsername:
-    Type: String
-    Default: "dbadmin"
-    NoEcho: true
-  RdsPassword:
-    Type: String
-    Default: "changeme"
-    NoEcho: true
   CorsAllowOrigin:
     Type: String
     Default: "*"
@@ -86,14 +68,14 @@ Resources:
     Type: AWS::SecretsManager::Secret
     Properties:
       Name: !Sub "${Project}-${Environment}/rds-credentials"
-      Description: !Sub "RDS credentials for ${Project}-${Environment}"
-      SecretString: !Sub |
+      Description: !Sub "RDS credentials for ${Project}-${Environment}. Update with actual values after deploy."
+      SecretString: |
         {
-          "host": "${RdsHost}",
-          "port": ${RdsPort},
-          "dbname": "${RdsDbName}",
-          "username": "${RdsUsername}",
-          "password": "${RdsPassword}"
+          "host": "REPLACE_WITH_RDS_ENDPOINT",
+          "port": 5432,
+          "dbname": "REPLACE_WITH_DB_NAME",
+          "username": "REPLACE_WITH_USERNAME",
+          "password": "REPLACE_WITH_PASSWORD"
         }
       Tags:
         - Key: project
