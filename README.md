@@ -5,7 +5,7 @@ A SAM-based backend starter kit for teams modernizing to serverless on AWS.
 ## Architecture
 
 ```
-Client → API Gateway (HTTP API) → Lambda (Python 3.12) → RDS PostgreSQL (via RDS Proxy)
+Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (via RDS Proxy)
               ↓
        Lambda Authorizer → validates Cognito JWT + group membership
 ```
@@ -14,7 +14,7 @@ Client → API Gateway (HTTP API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 
 | Component | Description |
 |---|---|
-| API Gateway (HTTP API) | Routes with CORS, per-app |
+| API Gateway (REST API) | Routes with CORS, WAF-ready, per-app |
 | Backend Lambda | CRUDQ API for `items` table in RDS PostgreSQL |
 | Authorizer Lambda | Validates Cognito JWT and checks group membership |
 | Cognito App Client | Per-app client in centralized User Pool |
