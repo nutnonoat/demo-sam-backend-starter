@@ -5,7 +5,7 @@ A SAM-based backend starter kit for teams modernizing to serverless on AWS.
 ## Architecture
 
 ```
-Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (via RDS)
+Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
               ↓
        Lambda Authorizer → validates Cognito JWT + group membership
 ```
@@ -18,39 +18,34 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 | Backend Lambda | CRUDQ API for `items` table in RDS PostgreSQL |
 | Authorizer Lambda | Validates Cognito JWT and checks group membership |
 | Cognito App Client | Per-app client in centralized User Pool |
-| Secrets Manager Secret | App-owned, created by template with RDS credentials |
+| Secrets Manager Secret | App-owned, created with placeholder values |
 | Lambda Security Group | App-owned SG in provided VPC |
 
 ## Prerequisites (infra team provides)
 
 - VPC with private subnets
-- RDS + RDS PostgreSQL
-- Secrets Manager secret with DB credentials and RDS endpoint (standard RDS format: `host`, `port`, `username`, `password`, `dbname`) — OR provide credentials as template parameters and the template creates the secret
+- RDS PostgreSQL
 - VPC endpoints: Secrets Manager
 - Cognito User Pool with app-specific group created
-- RDS security group allows inbound from app Lambda security group (output after first deploy)
+- Per-app database user and credentials (handed to app team securely)
+- RDS security group allows inbound from app Lambda security group (after first deploy)
 
 ## Parameters
 
 | Parameter | Required | Default | Description |
 |---|---|---|---|
-| `Project` | Yes | — | Application name for resource naming |
+| `Project` | Yes | - | Application name for resource naming |
 | `Environment` | No | `dev` | `dev`, `staging`, or `prod` |
-| `CognitoUserPoolId` | Yes | — | Shared Cognito User Pool ID |
-| `CognitoUserPoolArn` | Yes | — | Shared Cognito User Pool ARN |
-| `AllowedCognitoGroup` | Yes | — | Cognito group allowed to access this app |
-| `VpcId` | Yes | — | VPC ID for Lambda |
-| `PrivateSubnetIds` | Yes | — | Comma-separated private subnet IDs |
-| `RdsHost` | No | `your-rds-endpoint...` | RDS endpoint |
-| `RdsPort` | No | `5432` | Database port |
-| `RdsDbName` | No | `mydb` | Database name |
-| `RdsUsername` | No | `dbadmin` | Database username (NoEcho) |
-| `RdsPassword` | No | `changeme` | Database password (NoEcho) |
+| `CognitoUserPoolId` | Yes | - | Shared Cognito User Pool ID |
+| `CognitoUserPoolArn` | Yes | - | Shared Cognito User Pool ARN |
+| `AllowedCognitoGroup` | Yes | - | Cognito group allowed to access this app |
+| `VpcId` | Yes | - | VPC ID for Lambda |
+| `PrivateSubnetIds` | Yes | - | Comma-separated private subnet IDs |
 | `CorsAllowOrigin` | No | `*` | Frontend origin URL (must set when auth enabled) |
 | `LambdaTimeout` | No | `30` | Lambda timeout in seconds |
 | `LambdaMemory` | No | `512` | Lambda memory in MB |
 
-## Getting started — for app teams
+## Getting started - for app teams
 
 ### Step 1: Copy the template
 
@@ -61,7 +56,7 @@ cd my-app-name
 
 ### Step 2: Gather infra team inputs
 
-Before deploying, request the following from your infrastructure team:
+Request the following from your infrastructure team:
 
 | What you need | Example value |
 |---|---|
@@ -70,9 +65,9 @@ Before deploying, request the following from your infrastructure team:
 | Cognito group name for your app | `my-app-users` |
 | VPC ID | `vpc-0abc1234def56789` |
 | Private subnet IDs (2+) | `subnet-aaa111,subnet-bbb222` |
-| RDS endpoint | `my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com` |
-| Database name | `mydb` |
-| Database username | `dbadmin` |
+| RDS endpoint | `my-rds.xxx.ap-southeast-1.rds.amazonaws.com` |
+| Database name | `appdb` |
+| Database username | *(provided securely)* |
 | Database password | *(provided securely)* |
 
 ### Step 3: Deploy (first time)
@@ -91,22 +86,20 @@ Parameter CognitoUserPoolArn []: arn:aws:cognito-idp:ap-southeast-1:123456789012
 Parameter AllowedCognitoGroup []: my-app-users
 Parameter VpcId []: vpc-0abc1234def56789
 Parameter PrivateSubnetIds []: subnet-aaa111,subnet-bbb222
-Parameter RdsHost [your-rds-endpoint.rds.amazonaws.com]: my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com
-Parameter RdsDbName [mydb]: mydb
-Parameter RdsUsername [dbadmin]: dbadmin
-Parameter RdsPassword [changeme]: ********
 ...
 ```
 
-Your answers are saved to `samconfig.toml` automatically. You won't need to enter them again.
+Your answers are saved to `samconfig.toml` automatically.
 
-### Step 4: Subsequent deploys
+### Step 4: Update RDS credentials in Secrets Manager
+
+The template creates a secret with placeholder values. Update it with the actual credentials from your infra team:
 
 ```bash
-make deploy
+aws secretsmanager update-secret \
+  --secret-id my-app-name-dev/rds-credentials \
+  --secret-string '{"host":"my-rds.xxx.rds.amazonaws.com","port":5432,"dbname":"appdb","username":"myapp_user","password":"actual-password"}'
 ```
-
-To change parameter values later, run `make deploy-guided` again — it shows current values as defaults.
 
 ### Step 5: Post-deploy setup
 
@@ -114,7 +107,7 @@ To change parameter values later, run `make deploy-guided` again — it shows cu
    ```bash
    aws cloudformation describe-stacks --stack-name my-app-name-dev --query "Stacks[0].Outputs"
    ```
-2. Send `LambdaSecurityGroupId` to infra team — they must allow it inbound on the RDS security group (port 5432)
+2. Send `LambdaSecurityGroupId` to infra team - they must allow it inbound on the RDS security group (port 5432)
 3. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
 
 ### Step 6: Write your code
@@ -146,47 +139,7 @@ curl <ApiUrl>/items -H "Authorization: Bearer $TOKEN"
 make deploy
 ```
 
-## Quick start
-
-### 1. Configure
-
-Edit `samconfig.toml` and fill in the parameter values:
-
-```toml
-parameter_overrides = "Project=\"my-app\" Environment=\"dev\" CognitoUserPoolId=\"ap-southeast-1_XXXXX\" ..."
-```
-
-### 2. Build & deploy
-
-```bash
-make deploy-guided   # first time (interactive)
-make deploy          # subsequent deploys
-```
-
-### 3. Post-deploy
-
-1. Note the `LambdaSecurityGroupId` from stack outputs
-2. Ask infra team to allow this SG inbound on the RDS security group (port 5432)
-
-### 4. Test
-
-```bash
-# Get a Cognito token
-TOKEN=$(aws cognito-idp initiate-auth \
-  --client-id <AppClientId from outputs> \
-  --auth-flow USER_PASSWORD_AUTH \
-  --auth-parameters USERNAME=<user>,PASSWORD=<pass> \
-  --query 'AuthenticationResult.IdToken' --output text)
-
-# Create an item
-curl -X POST <ApiUrl>/items \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "test", "description": "hello world"}'
-
-# List items
-curl <ApiUrl>/items -H "Authorization: Bearer $TOKEN"
-```
+To change parameter values later, run `make deploy-guided` again.
 
 ## API routes
 
@@ -220,9 +173,9 @@ demo-sam-backend-starter/
 
 - **CORS**: Default `AllowOrigin` is `*` which works for development. When Cognito auth is used from a browser, you **must** set this to the actual frontend domain (e.g., `https://main.d1234.amplifyapp.com`), because browsers reject wildcard origins with `Authorization` headers.
 - **JWT verification**: The authorizer decodes and validates JWT claims (issuer, expiry, group) but does **not** perform RS256 signature verification. For production, add a library like `python-jose` or `PyJWT` with cryptographic verification against the JWKS endpoint.
-- **Secrets Manager**: The template creates a secret named `<Project>-<Environment>/rds-credentials` with the RDS connection details you provide as parameters. You can also update the secret values later via the console or CLI: `aws secretsmanager update-secret --secret-id <Project>-<Environment>/rds-credentials --secret-string '{"host":"...","port":5432,"dbname":"...","username":"...","password":"..."}'`
+- **Secrets Manager**: The template creates a secret named `<Project>-<Environment>/rds-credentials` with placeholder values. You must update it with actual credentials after deploy (see Step 4).
 - **DB table**: The `items` table is auto-created on first request. For production, use a migration tool.
-- **Connection management**: Each Lambda invocation opens and closes a DB connection. For high-throughput, RDS handles connection pooling on the database side.
+- **Connection management**: Each Lambda invocation opens and closes a DB connection.
 
 ## Cleanup
 
