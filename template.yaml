@@ -20,9 +20,6 @@ Parameters:
   CognitoUserPoolArn:
     Type: String
     Description: Centralized Cognito User Pool ARN (provided by infra team)
-  AllowedCognitoGroup:
-    Type: String
-    Description: Cognito group name allowed to access this app
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VPC ID where Lambda will run (provided by infra team)
@@ -118,6 +115,14 @@ Resources:
       SupportedIdentityProviders:
         - COGNITO
 
+  # ── Cognito Group (per-app, in shared User Pool) ──
+  CognitoAppGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: !Sub "${Project}-${Environment}-users"
+      UserPoolId: !Ref CognitoUserPoolId
+      Description: !Sub "Users for ${Project}-${Environment}"
+
   # ── API Gateway (REST API) ──
   ApiGateway:
     Type: AWS::Serverless::Api
@@ -152,7 +157,7 @@ Resources:
         Variables:
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_REGION: !Ref AWS::Region
-          ALLOWED_GROUP: !Ref AllowedCognitoGroup
+          ALLOWED_GROUP: !Sub "${Project}-${Environment}-users"
 
   # ── Backend Lambda ──
   BackendFunction:
@@ -220,6 +225,9 @@ Outputs:
   CognitoAppClientId:
     Description: Cognito App Client ID for frontend integration
     Value: !Ref CognitoAppClient
+  CognitoGroupName:
+    Description: Cognito group name (add users to this group to grant access)
+    Value: !Sub "${Project}-${Environment}-users"
   LambdaSecurityGroupId:
     Description: Lambda security group ID (infra team must allow this in RDS SG)
     Value: !Ref LambdaSecurityGroup
