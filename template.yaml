@@ -29,9 +29,24 @@ Parameters:
   PrivateSubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     Description: Private subnet IDs for Lambda (provided by infra team)
-  RdsSecretArn:
+  RdsHost:
     Type: String
-    Description: Secrets Manager ARN containing RDS Proxy endpoint and credentials
+    Default: "your-rds-proxy-endpoint.rds.amazonaws.com"
+    Description: RDS Proxy endpoint (provided by infra team)
+  RdsPort:
+    Type: String
+    Default: "5432"
+  RdsDbName:
+    Type: String
+    Default: "mydb"
+  RdsUsername:
+    Type: String
+    Default: "dbadmin"
+    NoEcho: true
+  RdsPassword:
+    Type: String
+    Default: "changeme"
+    NoEcho: true
   CorsAllowOrigin:
     Type: String
     Default: "*"
@@ -62,6 +77,21 @@ Globals:
 # Resources
 # ──────────────────────────────────────────────
 Resources:
+
+  # ── App-owned Secret (RDS credentials) ──
+  RdsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "${AppName}-${Environment}/rds-credentials"
+      Description: !Sub "RDS credentials for ${AppName}-${Environment}"
+      SecretString: !Sub |
+        {
+          "host": "${RdsHost}",
+          "port": ${RdsPort},
+          "dbname": "${RdsDbName}",
+          "username": "${RdsUsername}",
+          "password": "${RdsPassword}"
+        }
 
   # ── Security Group for Lambda ──
   LambdaSecurityGroup:
@@ -149,7 +179,7 @@ Resources:
         SubnetIds: !Ref PrivateSubnetIds
       Environment:
         Variables:
-          RDS_SECRET_ARN: !Ref RdsSecretArn
+          RDS_SECRET_ARN: !Ref RdsSecret
       Layers:
         - !Sub "arn:aws:lambda:${AWS::Region}:133490698326:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:14"
       Policies:
@@ -159,7 +189,7 @@ Resources:
             - Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
-              Resource: !Ref RdsSecretArn
+              Resource: !Ref RdsSecret
       Events:
         ListItems:
           Type: HttpApi
@@ -205,3 +235,6 @@ Outputs:
   LambdaSecurityGroupId:
     Description: Lambda security group ID (infra team must allow this in RDS/Proxy SG)
     Value: !Ref LambdaSecurityGroup
+  RdsSecretArn:
+    Description: Secrets Manager ARN for RDS credentials (update values via console or CLI)
+    Value: !Ref RdsSecret

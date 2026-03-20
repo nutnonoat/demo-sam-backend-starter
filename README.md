@@ -18,13 +18,14 @@ Client → API Gateway (HTTP API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 | Backend Lambda | CRUDQ API for `items` table in RDS PostgreSQL |
 | Authorizer Lambda | Validates Cognito JWT and checks group membership |
 | Cognito App Client | Per-app client in centralized User Pool |
+| Secrets Manager Secret | App-owned, created by template with RDS credentials |
 | Lambda Security Group | App-owned SG in provided VPC |
 
 ## Prerequisites (infra team provides)
 
 - VPC with private subnets
 - RDS Proxy + RDS PostgreSQL
-- Secrets Manager secret with DB credentials and proxy endpoint (standard RDS format: `host`, `port`, `username`, `password`, `dbname`)
+- Secrets Manager secret with DB credentials and proxy endpoint (standard RDS format: `host`, `port`, `username`, `password`, `dbname`) — OR provide credentials as template parameters and the template creates the secret
 - VPC endpoints: Secrets Manager
 - Cognito User Pool with app-specific group created
 - RDS/Proxy security group allows inbound from app Lambda security group (output after first deploy)
@@ -40,7 +41,11 @@ Client → API Gateway (HTTP API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 | `AllowedCognitoGroup` | Yes | — | Cognito group allowed to access this app |
 | `VpcId` | Yes | — | VPC ID for Lambda |
 | `PrivateSubnetIds` | Yes | — | Comma-separated private subnet IDs |
-| `RdsSecretArn` | Yes | — | Secrets Manager ARN with RDS credentials |
+| `RdsHost` | No | `your-rds-proxy-endpoint...` | RDS Proxy endpoint |
+| `RdsPort` | No | `5432` | Database port |
+| `RdsDbName` | No | `mydb` | Database name |
+| `RdsUsername` | No | `dbadmin` | Database username (NoEcho) |
+| `RdsPassword` | No | `changeme` | Database password (NoEcho) |
 | `CorsAllowOrigin` | No | `*` | Frontend origin URL (must set when auth enabled) |
 | `LambdaTimeout` | No | `30` | Lambda timeout in seconds |
 | `LambdaMemory` | No | `512` | Lambda memory in MB |
@@ -119,6 +124,7 @@ demo-sam-backend-starter/
 
 - **CORS**: Default `AllowOrigin` is `*` which works for development. When Cognito auth is used from a browser, you **must** set this to the actual frontend domain (e.g., `https://main.d1234.amplifyapp.com`), because browsers reject wildcard origins with `Authorization` headers.
 - **JWT verification**: The authorizer decodes and validates JWT claims (issuer, expiry, group) but does **not** perform RS256 signature verification. For production, add a library like `python-jose` or `PyJWT` with cryptographic verification against the JWKS endpoint.
+- **Secrets Manager**: The template creates a secret named `<AppName>-<Environment>/rds-credentials` with the RDS connection details you provide as parameters. You can also update the secret values later via the console or CLI: `aws secretsmanager update-secret --secret-id <AppName>-<Environment>/rds-credentials --secret-string '{"host":"...","port":5432,"dbname":"...","username":"...","password":"..."}'`
 - **DB table**: The `items` table is auto-created on first request. For production, use a migration tool.
 - **Connection management**: Each Lambda invocation opens and closes a DB connection. For high-throughput, RDS Proxy handles connection pooling on the database side.
 
