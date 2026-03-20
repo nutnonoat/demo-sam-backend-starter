@@ -75,23 +75,38 @@ Before deploying, request the following from your infrastructure team:
 | Database username | `dbadmin` |
 | Database password | *(provided securely)* |
 
-### Step 3: Configure
-
-Edit `samconfig.toml` and fill in your values:
-
-```toml
-[default.deploy.parameters]
-stack_name = "my-app-name-dev"
-region = "ap-southeast-1"
-parameter_overrides = "AppName=\"my-app-name\" Environment=\"dev\" CognitoUserPoolId=\"ap-southeast-1_AbCdEfG\" CognitoUserPoolArn=\"arn:aws:cognito-idp:ap-southeast-1:123456789012:userpool/ap-southeast-1_AbCdEfG\" AllowedCognitoGroup=\"my-app-users\" VpcId=\"vpc-0abc1234def56789\" PrivateSubnetIds=\"subnet-aaa111,subnet-bbb222\" RdsHost=\"my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com\" RdsDbName=\"mydb\" RdsUsername=\"dbadmin\" RdsPassword=\"your-password\""
-```
-
-### Step 4: Deploy
+### Step 3: Deploy (first time)
 
 ```bash
-make deploy-guided   # first time — confirms parameters interactively
-make deploy          # subsequent deploys
+make deploy-guided
 ```
+
+SAM will prompt you for each parameter one by one:
+
+```
+Parameter AppName []: my-app-name
+Parameter Environment [dev]: dev
+Parameter CognitoUserPoolId []: ap-southeast-1_AbCdEfG
+Parameter CognitoUserPoolArn []: arn:aws:cognito-idp:ap-southeast-1:123456789012:userpool/ap-southeast-1_AbCdEfG
+Parameter AllowedCognitoGroup []: my-app-users
+Parameter VpcId []: vpc-0abc1234def56789
+Parameter PrivateSubnetIds []: subnet-aaa111,subnet-bbb222
+Parameter RdsHost [your-rds-proxy-endpoint.rds.amazonaws.com]: my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com
+Parameter RdsDbName [mydb]: mydb
+Parameter RdsUsername [dbadmin]: dbadmin
+Parameter RdsPassword [changeme]: ********
+...
+```
+
+Your answers are saved to `samconfig.toml` automatically. You won't need to enter them again.
+
+### Step 4: Subsequent deploys
+
+```bash
+make deploy
+```
+
+To change parameter values later, run `make deploy-guided` again — it shows current values as defaults.
 
 ### Step 5: Post-deploy setup
 
