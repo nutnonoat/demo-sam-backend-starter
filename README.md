@@ -123,9 +123,9 @@ Example:
 ```bash
 ./test-api.sh \
   https://xxx.execute-api.ap-southeast-1.amazonaws.com/dev \
-  5m2v0a23tsn6gvhge8ds5o3qsu \
-  testuser@example.com \
-  'TestPass123!@#' \
+  <CognitoAppClientId> \
+  <cognito-username> \
+  '<cognito-password>' \
   ap-southeast-1
 ```
 
