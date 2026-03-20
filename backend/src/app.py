@@ -49,8 +49,19 @@ def _response(status_code, body):
     return {"statusCode": status_code, "body": json.dumps(body)}
 
 
+def _get_schema():
+    project = os.environ.get("PROJECT", "app")
+    env = os.environ.get("ENVIRONMENT", "dev")
+    return f"{project}_{env}".replace("-", "_")
+
+
 def _init_table(conn):
+    schema = _get_schema()
     with conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM information_schema.schemata WHERE schema_name = %s", (schema,))
+        if not cur.fetchone():
+            cur.execute(f"CREATE SCHEMA {schema}")
+        cur.execute(f"SET search_path TO {schema}")
         cur.execute("""
             CREATE TABLE IF NOT EXISTS items (
                 id SERIAL PRIMARY KEY,
