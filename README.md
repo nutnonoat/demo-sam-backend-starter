@@ -127,6 +127,15 @@ Example:
   ap-southeast-1
 ```
 
+```powershell
+.\test-api.ps1 `
+  https://xxx.execute-api.ap-southeast-1.amazonaws.com/dev `
+  <CognitoAppClientId> `
+  <cognito-username> `
+  '<cognito-password>' `
+  ap-southeast-1
+```
+
 The script tests all CRUD operations, 404 handling, and authentication/authorization (8 tests total).
 
 ## Building your own API
