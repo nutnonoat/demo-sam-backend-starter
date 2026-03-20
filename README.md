@@ -181,7 +181,8 @@ demo-sam-backend-starter/
 - **CORS**: Default `AllowOrigin` is `*` which works for development. When Cognito auth is used from a browser, you **must** set this to the actual frontend domain (e.g., `https://main.d1234.amplifyapp.com`), because browsers reject wildcard origins with `Authorization` headers.
 - **JWT verification**: The authorizer verifies JWT signature (RS256) against Cognito's JWKS keys, validates issuer, expiration, and group membership.
 - **Secrets Manager**: The template creates a secret named `<Project>-<Environment>/rds-credentials` with placeholder values. You must update it with actual credentials after deploy (see Step 4).
-- **DB table**: The `items` table is auto-created on first request. For production, use a migration tool.
+- **DB schema**: Lambda auto-creates a schema named `<project>_<environment>` (hyphens replaced with underscores, e.g., `my_app_dev`). If the infra team pre-creates the schema, Lambda uses it without needing extra privileges. If the schema doesn't exist, Lambda creates it (requires `CREATE` privilege on the database).
+- **DB table**: The `items` table is auto-created in the app schema on first request. For production, use a migration tool.
 - **Connection management**: Each Lambda invocation opens and closes a DB connection.
 
 ## Cleanup
