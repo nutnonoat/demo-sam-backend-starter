@@ -60,7 +60,7 @@ Globals:
       environment: !Ref Environment
     Environment:
       Variables:
-        APP_NAME: !Ref Project
+        PROJECT: !Ref Project
         ENVIRONMENT: !Ref Environment
 
 # ──────────────────────────────────────────────
