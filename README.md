@@ -102,16 +102,7 @@ aws secretsmanager update-secret \
    ```
 2. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
 
-### Step 6: Build your own API
-
-The template includes a working CRUD API for an `items` table as a starting point. To build your own:
-
-1. Add your tables/schema in `_init_table()` or replace with a migration tool
-2. Add your route handlers in `backend/src/app.py`
-3. Add corresponding API Gateway events in `template.yaml` under `BackendFunction.Events`
-4. Add any new Python dependencies to `backend/src/requirements.txt`
-
-### Step 7: Test
+### Step 6: Test
 
 Run the included test script:
 
@@ -131,13 +122,22 @@ Example:
 
 The script tests all CRUD operations, 404 handling, and authentication/authorization (8 tests total).
 
-### Step 8: Redeploy after code changes
+### Step 7: Redeploy after code changes
 
 ```bash
 make deploy
 ```
 
 To change parameter values later, run `make deploy-guided` again.
+
+## Building your own API
+
+The template includes a working CRUD API for an `items` table as a starting point. To build your own:
+
+1. Add your tables/schema in `_init_table()` or replace with a migration tool
+2. Add your route handlers in `backend/src/app.py`
+3. Add corresponding API Gateway events in `template.yaml` under `BackendFunction.Events`
+4. Add any new Python dependencies to `backend/src/requirements.txt`
 
 ## API routes
 
