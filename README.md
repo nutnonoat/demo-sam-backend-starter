@@ -50,6 +50,87 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL (v
 | `LambdaTimeout` | No | `30` | Lambda timeout in seconds |
 | `LambdaMemory` | No | `512` | Lambda memory in MB |
 
+## Getting started — for app teams
+
+### Step 1: Copy the template
+
+```bash
+cp -r demo-sam-backend-starter my-app-name
+cd my-app-name
+```
+
+### Step 2: Gather infra team inputs
+
+Before deploying, request the following from your infrastructure team:
+
+| What you need | Example value |
+|---|---|
+| Cognito User Pool ID | `ap-southeast-1_AbCdEfG` |
+| Cognito User Pool ARN | `arn:aws:cognito-idp:ap-southeast-1:123456789012:userpool/ap-southeast-1_AbCdEfG` |
+| Cognito group name for your app | `my-app-users` |
+| VPC ID | `vpc-0abc1234def56789` |
+| Private subnet IDs (2+) | `subnet-aaa111,subnet-bbb222` |
+| RDS Proxy endpoint | `my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com` |
+| Database name | `mydb` |
+| Database username | `dbadmin` |
+| Database password | *(provided securely)* |
+
+### Step 3: Configure
+
+Edit `samconfig.toml` and fill in your values:
+
+```toml
+[default.deploy.parameters]
+stack_name = "my-app-name-dev"
+region = "ap-southeast-1"
+parameter_overrides = "AppName=\"my-app-name\" Environment=\"dev\" CognitoUserPoolId=\"ap-southeast-1_AbCdEfG\" CognitoUserPoolArn=\"arn:aws:cognito-idp:ap-southeast-1:123456789012:userpool/ap-southeast-1_AbCdEfG\" AllowedCognitoGroup=\"my-app-users\" VpcId=\"vpc-0abc1234def56789\" PrivateSubnetIds=\"subnet-aaa111,subnet-bbb222\" RdsHost=\"my-proxy.proxy-xxx.ap-southeast-1.rds.amazonaws.com\" RdsDbName=\"mydb\" RdsUsername=\"dbadmin\" RdsPassword=\"your-password\""
+```
+
+### Step 4: Deploy
+
+```bash
+make deploy-guided   # first time — confirms parameters interactively
+make deploy          # subsequent deploys
+```
+
+### Step 5: Post-deploy setup
+
+1. Get stack outputs:
+   ```bash
+   aws cloudformation describe-stacks --stack-name my-app-name-dev --query "Stacks[0].Outputs"
+   ```
+2. Send `LambdaSecurityGroupId` to infra team — they must allow it inbound on the RDS/Proxy security group (port 5432)
+3. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
+
+### Step 6: Write your code
+
+Replace the sample code in `backend/src/app.py` with your application logic:
+
+1. Update the table schema in `_init_table()` or replace with a migration tool
+2. Add your routes in the `handler()` function
+3. Add corresponding API Gateway events in `template.yaml` under `BackendFunction.Events`
+4. Add any new Python dependencies to `backend/src/requirements.txt`
+
+### Step 7: Test
+
+```bash
+# Get a Cognito token
+TOKEN=$(aws cognito-idp initiate-auth \
+  --client-id <CognitoAppClientId> \
+  --auth-flow USER_PASSWORD_AUTH \
+  --auth-parameters USERNAME=<user>,PASSWORD=<pass> \
+  --query 'AuthenticationResult.IdToken' --output text)
+
+# Call your API
+curl <ApiUrl>/items -H "Authorization: Bearer $TOKEN"
+```
+
+### Step 8: Redeploy after code changes
+
+```bash
+make deploy
+```
+
 ## Quick start
 
 ### 1. Configure
