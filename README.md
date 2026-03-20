@@ -80,10 +80,10 @@ Request the following from your infrastructure team:
 ### Step 3: Deploy (first time)
 
 ```bash
-sam build --use-container && sam deploy --guided
+sam build --use-container && sam deploy --guided --tags "project=<Project> environment=<Environment>"
 ```
 
-SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
+SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically. The `--tags` flag ensures all resources (including API Gateway) are tagged consistently.
 
 ### Step 4: Update RDS credentials in Secrets Manager
 
