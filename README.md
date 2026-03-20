@@ -16,7 +16,7 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 |---|---|
 | API Gateway (REST API) | Routes with CORS, WAF-ready, per-app |
 | Backend Lambda | CRUDQ API for `items` table in RDS PostgreSQL |
-| Authorizer Lambda | Validates Cognito JWT and checks group membership |
+| Authorizer Lambda | Validates Cognito JWT signature (RS256) and checks group membership |
 | Cognito App Client | Per-app client in centralized User Pool |
 | Secrets Manager Secret | App-owned, created with placeholder values |
 | Lambda Security Group | App-owned SG in provided VPC |
@@ -33,9 +33,8 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 ## Prerequisites (local machine)
 
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-- Python 3.12 (must match the runtime in template.yaml)
+- [Docker](https://docs.docker.com/get-docker/) (required for `sam build --use-container`)
 - AWS CLI configured with credentials
-- Docker (optional, for `sam build --use-container` if Python version doesn't match)
 
 ## Parameters
 
@@ -48,6 +47,7 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 | `AllowedCognitoGroup` | Yes | - | Cognito group allowed to access this app |
 | `VpcId` | Yes | - | VPC ID for Lambda |
 | `PrivateSubnetIds` | Yes | - | Comma-separated private subnet IDs |
+| `SecretsExtensionLayerArn` | No | *(ap-southeast-1 default)* | AWS Parameters and Secrets Lambda Extension layer ARN ([find your region's ARN](https://docs.aws.amazon.com/systems-manager/latest/userguide/ps-integration-lambda-extensions.html)) |
 | `CorsAllowOrigin` | No | `*` | Frontend origin URL (must set when auth enabled) |
 | `LambdaTimeout` | No | `30` | Lambda timeout in seconds |
 | `LambdaMemory` | No | `512` | Lambda memory in MB |
@@ -83,20 +83,7 @@ Request the following from your infrastructure team:
 make deploy-guided
 ```
 
-SAM will prompt you for each parameter one by one:
-
-```
-Parameter Project []: my-app-name
-Parameter Environment [dev]: dev
-Parameter CognitoUserPoolId []: ap-southeast-1_AbCdEfG
-Parameter CognitoUserPoolArn []: arn:aws:cognito-idp:ap-southeast-1:123456789012:userpool/ap-southeast-1_AbCdEfG
-Parameter AllowedCognitoGroup []: my-app-users
-Parameter VpcId []: vpc-0abc1234def56789
-Parameter PrivateSubnetIds []: subnet-aaa111,subnet-bbb222
-...
-```
-
-Your answers are saved to `samconfig.toml` automatically.
+SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
 
 ### Step 4: Update RDS credentials in Secrets Manager
 
@@ -104,7 +91,7 @@ The template creates a secret with placeholder values. Update it with the actual
 
 ```bash
 aws secretsmanager update-secret \
-  --secret-id my-app-name-dev/rds-credentials \
+  --secret-id <Project>-<Environment>/rds-credentials \
   --secret-string '{"host":"my-rds.xxx.rds.amazonaws.com","port":5432,"dbname":"appdb","username":"myapp_user","password":"actual-password"}'
 ```
 
@@ -112,7 +99,7 @@ aws secretsmanager update-secret \
 
 1. Get stack outputs:
    ```bash
-   aws cloudformation describe-stacks --stack-name my-app-name-dev --query "Stacks[0].Outputs"
+   aws cloudformation describe-stacks --stack-name <your-stack-name> --query "Stacks[0].Outputs"
    ```
 2. Send `LambdaSecurityGroupId` to infra team - they must allow it inbound on the RDS security group (port 5432)
 3. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
@@ -128,17 +115,23 @@ Replace the sample code in `backend/src/app.py` with your application logic:
 
 ### Step 7: Test
 
-```bash
-# Get a Cognito token
-TOKEN=$(aws cognito-idp initiate-auth \
-  --client-id <CognitoAppClientId> \
-  --auth-flow USER_PASSWORD_AUTH \
-  --auth-parameters USERNAME=<user>,PASSWORD=<pass> \
-  --query 'AuthenticationResult.IdToken' --output text)
+Run the included test script:
 
-# Call your API
-curl <ApiUrl>/items -H "Authorization: Bearer $TOKEN"
+```bash
+./test-api.sh <ApiUrl> <CognitoAppClientId> <username> <password> <region>
 ```
+
+Example:
+```bash
+./test-api.sh \
+  https://xxx.execute-api.ap-southeast-1.amazonaws.com/dev \
+  5m2v0a23tsn6gvhge8ds5o3qsu \
+  testuser@example.com \
+  'TestPass123!@#' \
+  ap-southeast-1
+```
+
+The script tests all CRUD operations, 404 handling, and authentication/authorization (8 tests total).
 
 ### Step 8: Redeploy after code changes
 
@@ -165,14 +158,15 @@ demo-sam-backend-starter/
 ├── template.yaml              # SAM template (all infrastructure)
 ├── samconfig.toml             # Deploy configuration
 ├── Makefile                   # Build/deploy commands
+├── test-api.sh                # API test script (CRUD + auth tests)
 ├── backend/
 │   └── src/
 │       ├── app.py             # Lambda handler with CRUDQ routing
 │       └── requirements.txt   # Python dependencies (psycopg2)
 ├── authorizer/
 │   └── src/
-│       ├── authorizer.py      # JWT validation + group check
-│       └── requirements.txt   # No external dependencies
+│       ├── authorizer.py      # JWT signature verification + group check
+│       └── requirements.txt   # python-jose for RS256 verification
 └── README.md
 ```
 
@@ -184,6 +178,7 @@ demo-sam-backend-starter/
 - **DB schema**: Lambda auto-creates a schema named `<project>_<environment>` (hyphens replaced with underscores, e.g., `my_app_dev`). If the infra team pre-creates the schema, Lambda uses it without needing extra privileges. If the schema doesn't exist, Lambda creates it (requires `CREATE` privilege on the database).
 - **DB table**: The `items` table is auto-created in the app schema on first request. For production, use a migration tool.
 - **Connection management**: Each Lambda invocation opens and closes a DB connection.
+- **Lambda Extension layer**: The default layer ARN is for `ap-southeast-1`. If deploying to a different region, override `SecretsExtensionLayerArn` with the correct ARN from [AWS docs](https://docs.aws.amazon.com/systems-manager/latest/userguide/ps-integration-lambda-extensions.html).
 
 ## Cleanup
 
