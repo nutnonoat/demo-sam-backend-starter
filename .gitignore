@@ -1,0 +1,19 @@
+# SAM
+.aws-sam/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Terraform (if used alongside)
+*.tfstate
+*.tfstate.backup
+.terraform/

@@ -1,0 +1,207 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Backend starter kit — API Gateway + Lambda + Cognito auth + RDS via Secrets Manager
+
+# ──────────────────────────────────────────────
+# Parameters
+# ──────────────────────────────────────────────
+Parameters:
+  AppName:
+    Type: String
+    Description: Application name used for resource naming
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+  CognitoUserPoolId:
+    Type: String
+    Description: Centralized Cognito User Pool ID (provided by infra team)
+  CognitoUserPoolArn:
+    Type: String
+    Description: Centralized Cognito User Pool ARN (provided by infra team)
+  AllowedCognitoGroup:
+    Type: String
+    Description: Cognito group name allowed to access this app
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID where Lambda will run (provided by infra team)
+  PrivateSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Private subnet IDs for Lambda (provided by infra team)
+  RdsSecretArn:
+    Type: String
+    Description: Secrets Manager ARN containing RDS Proxy endpoint and credentials
+  CorsAllowOrigin:
+    Type: String
+    Default: "*"
+    Description: Allowed CORS origin. Must be set to actual frontend domain when auth is enabled.
+  LambdaTimeout:
+    Type: Number
+    Default: 30
+  LambdaMemory:
+    Type: Number
+    Default: 512
+
+# ──────────────────────────────────────────────
+# Globals
+# ──────────────────────────────────────────────
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: !Ref LambdaTimeout
+    MemorySize: !Ref LambdaMemory
+    Architectures:
+      - arm64
+    Environment:
+      Variables:
+        APP_NAME: !Ref AppName
+        ENVIRONMENT: !Ref Environment
+
+# ──────────────────────────────────────────────
+# Resources
+# ──────────────────────────────────────────────
+Resources:
+
+  # ── Security Group for Lambda ──
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "${AppName}-${Environment}-lambda-sg"
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "${AppName}-${Environment}-lambda-sg"
+
+  # ── Cognito App Client (per-app, in shared User Pool) ──
+  CognitoAppClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "${AppName}-${Environment}"
+      UserPoolId: !Ref CognitoUserPoolId
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+
+  # ── API Gateway (HTTP API) ──
+  ApiGateway:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref CorsAllowOrigin
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Authorization
+          - Content-Type
+        MaxAge: 3600
+      Auth:
+        DefaultAuthorizer: CognitoLambdaAuthorizer
+        Authorizers:
+          CognitoLambdaAuthorizer:
+            FunctionArn: !GetAtt AuthorizerFunction.Arn
+            AuthorizerPayloadFormatVersion: "2.0"
+            EnableSimpleResponses: true
+            Identity:
+              Headers:
+                - Authorization
+
+  # ── Authorizer Lambda ──
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AppName}-${Environment}-authorizer"
+      CodeUri: authorizer/src/
+      Handler: authorizer.handler
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_REGION: !Ref AWS::Region
+          ALLOWED_GROUP: !Ref AllowedCognitoGroup
+      Policies:
+        - Version: "2012-10-17"
+          Statement: []
+
+  # ── Backend Lambda ──
+  BackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AppName}-${Environment}-api"
+      CodeUri: backend/src/
+      Handler: app.handler
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds: !Ref PrivateSubnetIds
+      Environment:
+        Variables:
+          RDS_SECRET_ARN: !Ref RdsSecretArn
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:133490698326:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:14"
+      Policies:
+        - VPCAccessPolicy: {}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref RdsSecretArn
+      Events:
+        ListItems:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiGateway
+            Path: /items
+            Method: GET
+        GetItem:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiGateway
+            Path: /items/{id}
+            Method: GET
+        CreateItem:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiGateway
+            Path: /items
+            Method: POST
+        UpdateItem:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiGateway
+            Path: /items/{id}
+            Method: PUT
+        DeleteItem:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiGateway
+            Path: /items/{id}
+            Method: DELETE
+
+# ──────────────────────────────────────────────
+# Outputs
+# ──────────────────────────────────────────────
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+  CognitoAppClientId:
+    Description: Cognito App Client ID for frontend integration
+    Value: !Ref CognitoAppClient
+  LambdaSecurityGroupId:
+    Description: Lambda security group ID (infra team must allow this in RDS/Proxy SG)
+    Value: !Ref LambdaSecurityGroup
