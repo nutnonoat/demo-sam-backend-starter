@@ -146,9 +146,6 @@ Resources:
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_REGION: !Ref AWS::Region
           ALLOWED_GROUP: !Ref AllowedCognitoGroup
-      Policies:
-        - Version: "2012-10-17"
-          Statement: []
 
   # ── Backend Lambda ──
   BackendFunction:
