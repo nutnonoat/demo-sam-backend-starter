@@ -38,7 +38,7 @@ Parameters:
     Default: "5432"
   RdsDbName:
     Type: String
-    Default: "mydb"
+    Default: "appdb"
   RdsUsername:
     Type: String
     Default: "dbadmin"
