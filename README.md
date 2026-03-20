@@ -107,8 +107,14 @@ aws secretsmanager update-secret \
 
 Run the included test script:
 
+**Bash (macOS/Linux):**
 ```bash
 ./test-api.sh <ApiUrl> <CognitoAppClientId> <username> <password> <region>
+```
+
+**PowerShell (Windows):**
+```powershell
+.\test-api.ps1 <ApiUrl> <CognitoAppClientId> <username> <password> <region>
 ```
 
 Example:
