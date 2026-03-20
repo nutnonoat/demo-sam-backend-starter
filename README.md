@@ -34,7 +34,7 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 - [Docker](https://docs.docker.com/get-docker/) (required for `sam build --use-container`)
 - AWS CLI configured with credentials
-- **Windows users**: `make` commands can be replaced with direct SAM CLI commands (see Makefile for equivalents). Use PowerShell version of test script (`test-api.ps1`).
+- **Windows users**: Use PowerShell version of test script (`test-api.ps1`)
 
 ## Parameters
 
