@@ -70,7 +70,7 @@ def _generate_policy(principal_id, effect, method_arn, context=None):
 
 def handler(event, context):
     try:
-        token = event.get("headers", {}).get("Authorization", "").replace("Bearer ", "")
+        token = event.get("headers", {}).get("Authorization", event.get("headers", {}).get("authorization", "")).replace("Bearer ", "")
         method_arn = event.get("methodArn", "")
 
         if not token:
@@ -106,5 +106,6 @@ def handler(event, context):
                 "groups": ",".join(groups),
             },
         )
-    except Exception:
+    except Exception as e:
+        print(f"Authorizer error: {e}")
         return _generate_policy("anonymous", "Deny", event.get("methodArn", ""))
