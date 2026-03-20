@@ -60,7 +60,7 @@ def _init_table(conn):
     with conn.cursor() as cur:
         cur.execute("SELECT 1 FROM information_schema.schemata WHERE schema_name = %s", (schema,))
         if not cur.fetchone():
-            cur.execute(f"CREATE SCHEMA {schema}")
+            cur.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
         cur.execute(f"SET search_path TO {schema}")
         cur.execute("""
             CREATE TABLE IF NOT EXISTS items (
