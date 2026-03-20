@@ -98,6 +98,8 @@ Resources:
         - IpProtocol: "-1"
           CidrIp: 0.0.0.0/0
       Tags:
+        - Key: Name
+          Value: !Sub "${Project}-${Environment}-lambda-sg"
         - Key: project
           Value: !Ref Project
         - Key: environment
