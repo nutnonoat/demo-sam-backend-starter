@@ -68,6 +68,9 @@ Globals:
     MemorySize: !Ref LambdaMemory
     Architectures:
       - arm64
+    Tags:
+      project: !Ref AppName
+      env: !Ref Environment
     Environment:
       Variables:
         APP_NAME: !Ref AppName
@@ -105,6 +108,10 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub "${AppName}-${Environment}-lambda-sg"
+        - Key: project
+          Value: !Ref AppName
+        - Key: env
+          Value: !Ref Environment
 
   # ── Cognito App Client (per-app, in shared User Pool) ──
   CognitoAppClient:
