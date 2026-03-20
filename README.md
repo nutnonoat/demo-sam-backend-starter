@@ -80,7 +80,7 @@ Request the following from your infrastructure team:
 ### Step 3: Deploy (first time)
 
 ```bash
-make deploy-guided
+sam build --use-container && sam deploy --guided
 ```
 
 SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
@@ -126,10 +126,10 @@ The script tests all CRUD operations, 404 handling, and authentication/authoriza
 ### Step 7: Redeploy after code changes
 
 ```bash
-make deploy
+sam build --use-container && sam deploy
 ```
 
-To change parameter values later, run `make deploy-guided` again.
+To change parameter values later, run `sam build --use-container && sam deploy --guided` again.
 
 ## Building your own API
 
@@ -156,7 +156,6 @@ The template includes a working CRUD API for an `items` table as a starting poin
 demo-sam-backend-starter/
 ├── template.yaml              # SAM template (all infrastructure)
 ├── samconfig.toml             # Deploy configuration
-├── Makefile                   # Build/deploy commands
 ├── test-api.sh                # API test script (bash)
 ├── test-api.ps1               # API test script (PowerShell for Windows)
 ├── backend/
@@ -183,5 +182,5 @@ demo-sam-backend-starter/
 ## Cleanup
 
 ```bash
-make delete
+sam delete
 ```
