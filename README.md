@@ -30,6 +30,13 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 - Per-app database user and credentials (handed to app team securely)
 - RDS security group allows inbound from app Lambda security group (after first deploy)
 
+## Prerequisites (local machine)
+
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+- Python 3.12 (must match the runtime in template.yaml)
+- AWS CLI configured with credentials
+- Docker (optional, for `sam build --use-container` if Python version doesn't match)
+
 ## Parameters
 
 | Parameter | Required | Default | Description |
