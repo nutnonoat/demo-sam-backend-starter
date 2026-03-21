@@ -231,3 +231,9 @@ Outputs:
   RdsSecretArn:
     Description: Secrets Manager ARN for RDS credentials (update values via console or CLI)
     Value: !Ref RdsSecret
+  TestApiCommandBash:
+    Description: Bash command to test the API (replace username and password)
+    Value: !Sub "./test-api.sh ${AWS::StackName} <cognito-username> <cognito-password> ${AWS::Region}"
+  TestApiCommandWindows:
+    Description: PowerShell command to test the API (replace username and password)
+    Value: !Sub ".\\test-api.ps1 ${AWS::StackName} <cognito-username> <cognito-password> ${AWS::Region}"
