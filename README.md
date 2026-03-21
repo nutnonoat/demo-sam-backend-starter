@@ -84,7 +84,7 @@ Request the following from your infrastructure team:
 |---|---|
 | Cognito User Pool ID | `ap-southeast-1_AbCdEfG` |
 | Cognito User Pool ARN | `arn:aws:cognito-idp:ap-southeast-1:123456789012:userpool/ap-southeast-1_AbCdEfG` |
-| Cognito group name for your app | `my-app-users` |
+| Cognito User Group name for your app | `my-app-users` |
 | VPC ID | `vpc-0abc1234def56789` |
 | Private subnet IDs (2+) | `subnet-aaa111,subnet-bbb222` |
 | RDS endpoint | `my-rds.xxx.ap-southeast-1.rds.amazonaws.com` |
