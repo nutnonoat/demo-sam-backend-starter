@@ -233,7 +233,7 @@ Outputs:
     Value: !Ref RdsSecret
   TestApiCommandBash:
     Description: Bash command to test the API (replace username and password)
-    Value: !Sub "./test-api.sh ${AWS::StackName} <cognito-username> <cognito-password> ${AWS::Region}"
+    Value: !Sub "./test-api.sh ${AWS::StackName} <cognito-username> <cognito-password>"
   TestApiCommandWindows:
     Description: PowerShell command to test the API (replace username and password)
-    Value: !Sub ".\\test-api.ps1 ${AWS::StackName} <cognito-username> <cognito-password> ${AWS::Region}"
+    Value: !Sub ".\\test-api.ps1 ${AWS::StackName} <cognito-username> <cognito-password>"

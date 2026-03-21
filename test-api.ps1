@@ -1,12 +1,13 @@
-# Usage: .\test-api.ps1 <stack-name> <cognito-username> <cognito-password> [region]
+# Usage: .\test-api.ps1 <stack-name> <cognito-username> <cognito-password>
 param(
     [Parameter(Mandatory)][string]$StackName,
     [Parameter(Mandatory)][string]$Username,
-    [Parameter(Mandatory)][string]$Password,
-    [string]$Region = "ap-southeast-1"
+    [Parameter(Mandatory)][string]$Password
 )
 
 $ErrorActionPreference = "Stop"
+$Region = (Select-String -Path "samconfig.toml" -Pattern "^region" | Select-Object -First 1).Line -replace '.*=\s*"?([^"]+)"?.*','$1'
+if (-not $Region) { $Region = "ap-southeast-1" }
 
 Write-Host "Reading stack outputs from $StackName..."
 $ApiUrl = aws cloudformation describe-stacks --stack-name $StackName --region $Region `
