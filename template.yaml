@@ -234,6 +234,6 @@ Outputs:
   TestApiCommandBash:
     Description: Bash command to test the API (replace username and password)
     Value: !Sub "./test-api.sh ${AWS::StackName} ${AWS::Region} <cognito-username> <cognito-password>"
-  TestApiCommandWindows:
+  TestApiCommandPowerShell:
     Description: PowerShell command to test the API (replace username and password)
     Value: !Sub ".\\test-api.ps1 ${AWS::StackName} ${AWS::Region} <cognito-username> <cognito-password>"
