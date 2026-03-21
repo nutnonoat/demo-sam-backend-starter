@@ -36,6 +36,21 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 - AWS CLI configured with credentials
 - **Windows users**: Use PowerShell version of test script (`test-api.ps1`)
 
+## AWS credentials
+
+Configure your AWS profile before deploying:
+
+```bash
+# If using IAM Identity Center (SSO)
+aws configure sso           # one-time setup
+aws sso login --profile <profile-name>
+
+# Set the profile for SAM CLI
+export AWS_PROFILE=<profile-name>
+```
+
+If using the default profile, no `AWS_PROFILE` is needed.
+
 ## Parameters
 
 | Parameter | Required | Default | Description |
