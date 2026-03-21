@@ -85,6 +85,18 @@ echo "$RES" | jq .
 check "Fake token denied" "not authorized\|Unauthorized" "$RES"
 
 echo ""
+echo "=== 9. CORS preflight (Should return CORS headers) ==="
+RES=$(curl -s -X OPTIONS "$API_URL/items" -H "Origin: https://example.com" -H "Access-Control-Request-Method: POST" -D /tmp/cors_headers -o /dev/null && cat /tmp/cors_headers)
+echo "$RES"
+check "Preflight returns Allow-Origin" "access-control-allow-origin" "$RES"
+
+echo ""
+echo "=== 10. CORS on GET response (Should return CORS headers) ==="
+RES=$(curl -s "$API_URL/items" -H "$AUTH" -H "Origin: https://example.com" -D /tmp/cors_get_headers -o /dev/null && cat /tmp/cors_get_headers)
+echo "$RES"
+check "GET response returns Allow-Origin" "access-control-allow-origin" "$RES"
+
+echo ""
 echo "================================"
 echo "Results: $PASS passed, $FAIL failed"
 echo "================================"

@@ -136,7 +136,7 @@ Example:
   ap-southeast-1
 ```
 
-The script tests all CRUD operations, 404 handling, and authentication/authorization (8 tests total).
+The script tests all CRUD operations, 404 handling, authentication/authorization, and CORS (10 tests total).
 
 ## Building your own API
 
