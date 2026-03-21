@@ -1,7 +1,6 @@
-# Usage: .\test-api.ps1 <API_URL> <COGNITO_CLIENT_ID> <USERNAME> <PASSWORD> <REGION>
+# Usage: .\test-api.ps1 <stack-name> <cognito-username> <cognito-password> [region]
 param(
-    [Parameter(Mandatory)][string]$ApiUrl,
-    [Parameter(Mandatory)][string]$ClientId,
+    [Parameter(Mandatory)][string]$StackName,
     [Parameter(Mandatory)][string]$Username,
     [Parameter(Mandatory)][string]$Password,
     [string]$Region = "ap-southeast-1"
@@ -9,7 +8,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "Getting Cognito token..."
+Write-Host "Reading stack outputs from $StackName..."
+$ApiUrl = aws cloudformation describe-stacks --stack-name $StackName --region $Region `
+    --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text
+$ClientId = aws cloudformation describe-stacks --stack-name $StackName --region $Region `
+    --query "Stacks[0].Outputs[?OutputKey=='CognitoAppClientId'].OutputValue" --output text
+
+Write-Host "API URL:   $ApiUrl"
+Write-Host "Client ID: $ClientId"
+
+Write-Host "`nGetting Cognito token..."
 $Token = aws cognito-idp initiate-auth `
     --client-id $ClientId `
     --auth-flow USER_PASSWORD_AUTH `

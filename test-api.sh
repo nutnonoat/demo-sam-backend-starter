@@ -1,15 +1,24 @@
 #!/bin/bash
-# Usage: ./test-api.sh <API_URL> <COGNITO_CLIENT_ID> <USERNAME> <PASSWORD> <REGION>
-# Example: ./test-api.sh https://xxx.execute-api.ap-southeast-1.amazonaws.com/dev 5m2v0a23tsn6gvhge8ds5o3qsu testuser@example.com 'TestPass123!@#' ap-southeast-1
+# Usage: ./test-api.sh <stack-name> <cognito-username> <cognito-password> [region]
+# Example: ./test-api.sh demo-tg-sam-backend appuser@aws.local 'AppP@ssw0rd!' ap-southeast-1
 
 set -e
 
-API_URL="${1:?Usage: $0 <API_URL> <COGNITO_CLIENT_ID> <USERNAME> <PASSWORD> <REGION>}"
-CLIENT_ID="${2:?Missing COGNITO_CLIENT_ID}"
-USERNAME="${3:?Missing USERNAME}"
-PASSWORD="${4:?Missing PASSWORD}"
-REGION="${5:-ap-southeast-1}"
+STACK_NAME="${1:?Usage: $0 <stack-name> <cognito-username> <cognito-password> [region]}"
+USERNAME="${2:?Missing cognito-username}"
+PASSWORD="${3:?Missing cognito-password}"
+REGION="${4:-ap-southeast-1}"
 
+echo "Reading stack outputs from $STACK_NAME..."
+API_URL=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$REGION" \
+  --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
+CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$REGION" \
+  --query "Stacks[0].Outputs[?OutputKey=='CognitoAppClientId'].OutputValue" --output text)
+
+echo "API URL:   $API_URL"
+echo "Client ID: $CLIENT_ID"
+
+echo ""
 echo "Getting Cognito token..."
 TOKEN=$(aws cognito-idp initiate-auth \
   --client-id "$CLIENT_ID" \
