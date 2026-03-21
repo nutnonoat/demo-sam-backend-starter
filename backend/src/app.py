@@ -49,7 +49,7 @@ def _response(status_code, body):
     return {
         "statusCode": status_code,
         "headers": {
-            "Access-Control-Allow-Origin": os.environ.get("CORS_ALLOW_ORIGIN", "*"),
+            "Access-Control-Allow-Origin": os.environ.get("CORS_ALLOW_ORIGIN", ""),
             "Access-Control-Allow-Headers": "Authorization,Content-Type",
             "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
         },
