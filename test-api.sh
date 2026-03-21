@@ -4,10 +4,10 @@
 
 set -e
 
-STACK_NAME="${1:?Usage: $0 <stack-name> <cognito-username> <cognito-password> [region]}"
-USERNAME="${2:?Missing cognito-username}"
-PASSWORD="${3:?Missing cognito-password}"
-REGION="${4:-ap-southeast-1}"
+STACK_NAME="${1:?Usage: $0 <stack-name> <region> <cognito-username> <cognito-password>}"
+REGION="${2:?Missing region}"
+USERNAME="${3:?Missing cognito-username}"
+PASSWORD="${4:?Missing cognito-password}"
 
 echo "Reading stack outputs from $STACK_NAME..."
 API_URL=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$REGION" \
