@@ -3,7 +3,7 @@
 import json
 import os
 import urllib.request
-import psycopg2
+import psycopg
 from contextlib import contextmanager
 
 RDS_SECRET_ARN = os.environ["RDS_SECRET_ARN"]
@@ -33,7 +33,7 @@ def _get_db_config():
 @contextmanager
 def get_connection():
     cfg = _get_db_config()
-    conn = psycopg2.connect(**cfg)
+    conn = psycopg.connect(**cfg, autocommit=False)
     try:
         yield conn
         conn.commit()

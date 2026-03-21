@@ -194,7 +194,7 @@ demo-sam-backend-starter/
 ├── backend/
 │   └── src/
 │       ├── app.py             # Lambda handler with CRUDQ routing
-│       └── requirements.txt   # Python dependencies (psycopg2)
+│       └── requirements.txt   # Python dependencies (psycopg v3)
 ├── authorizer/
 │   └── src/
 │       ├── authorizer.py      # JWT signature verification + group check
