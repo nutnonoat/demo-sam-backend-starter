@@ -217,6 +217,28 @@ demo-sam-backend-starter/
 - **Connection management**: Each Lambda invocation opens and closes a DB connection.
 - **Lambda Extension layer**: The default layer ARN is for `ap-southeast-1`. If deploying to a different region, override `SecretsExtensionLayerArn` with the correct ARN from [AWS docs](https://docs.aws.amazon.com/systems-manager/latest/userguide/ps-integration-lambda-extensions.html).
 
+## Troubleshooting
+
+**Deploy fails with ROLLBACK_COMPLETE**
+
+If a previous deploy failed, the stack is left in `ROLLBACK_COMPLETE` state. Delete it first, then redeploy:
+
+```bash
+sam delete --stack-name <your-stack-name> --region <region>
+sam build --use-container && sam deploy --guided
+```
+
+**Docker is unreachable**
+
+SAM needs Docker for `--use-container`. If using Colima instead of Docker Desktop:
+
+```bash
+colima start
+export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+```
+
+Add the `DOCKER_HOST` export to `~/.zshrc` to make it permanent.
+
 ## Cleanup
 
 ```bash
