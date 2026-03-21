@@ -124,7 +124,12 @@ aws secretsmanager update-secret \
    ```bash
    aws cloudformation describe-stacks --stack-name <your-stack-name> --query "Stacks[0].Outputs"
    ```
-2. Note `ApiUrl` and `CognitoAppClientId` for testing and frontend integration
+2. Note these key outputs:
+   - `ApiUrl` — API endpoint for testing and frontend integration
+   - `CognitoAppClientId` — for Cognito authentication
+   - `RdsSecretArn` — Secrets Manager secret to update with RDS credentials
+   - `LambdaSecurityGroupId` — Lambda SG (for reference)
+   - `TestApiCommandBash` / `TestApiCommandPowerShell` — copy and paste to run tests
 
 ### Step 6: Test
 
