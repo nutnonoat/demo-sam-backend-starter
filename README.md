@@ -98,6 +98,14 @@ Request the following from your infrastructure team:
 sam build --use-container && sam deploy --guided
 ```
 
+To add custom tags to all resources in the stack:
+
+```bash
+sam build --use-container && sam deploy --guided --tags "auto-delete=no team=platform"
+```
+
+Tags are saved to `samconfig.toml` and reused on subsequent deploys.
+
 SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
 
 ### Step 4: Update RDS credentials in Secrets Manager
