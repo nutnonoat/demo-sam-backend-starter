@@ -172,6 +172,7 @@ Resources:
       Environment:
         Variables:
           RDS_SECRET_ARN: !Ref RdsSecret
+          CORS_ALLOW_ORIGIN: !Ref CorsAllowOrigin
       Layers:
         - !Ref SecretsExtensionLayerArn
       Policies:

@@ -46,7 +46,15 @@ def get_connection():
 
 # ── Helpers ──
 def _response(status_code, body):
-    return {"statusCode": status_code, "body": json.dumps(body)}
+    return {
+        "statusCode": status_code,
+        "headers": {
+            "Access-Control-Allow-Origin": os.environ.get("CORS_ALLOW_ORIGIN", "*"),
+            "Access-Control-Allow-Headers": "Authorization,Content-Type",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        },
+        "body": json.dumps(body),
+    }
 
 
 def _get_schema():
