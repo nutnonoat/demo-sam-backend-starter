@@ -4,11 +4,10 @@
 
 set -e
 
-STACK_NAME="${1:?Usage: $0 <stack-name> <cognito-username> <cognito-password>}"
+STACK_NAME="${1:?Usage: $0 <stack-name> <cognito-username> <cognito-password> [region]}"
 USERNAME="${2:?Missing cognito-username}"
 PASSWORD="${3:?Missing cognito-password}"
-REGION=$(grep "^region" samconfig.toml 2>/dev/null | head -1 | tr -d ' "' | cut -d= -f2)
-REGION="${REGION:-ap-southeast-1}"
+REGION="${4:-ap-southeast-1}"
 
 echo "Reading stack outputs from $STACK_NAME..."
 API_URL=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$REGION" \

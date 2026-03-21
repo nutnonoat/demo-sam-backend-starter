@@ -132,21 +132,21 @@ Run the included test script:
 
 **Bash (macOS/Linux):**
 ```bash
-./test-api.sh <stack-name> <cognito-username> '<cognito-password>'
+./test-api.sh <stack-name> <cognito-username> '<cognito-password>' <region>
 ```
 
 **PowerShell (Windows):**
 ```powershell
-.\test-api.ps1 <stack-name> <cognito-username> '<cognito-password>'
+.\test-api.ps1 <stack-name> <cognito-username> '<cognito-password>' <region>
 ```
 
 Example:
 ```bash
-./test-api.sh demo-tg-sam-backend appuser@aws.local 'AppP@ssw0rd!'
+./test-api.sh demo-tg-sam-backend appuser@aws.local 'AppP@ssw0rd!' ap-southeast-1
 ```
 
 ```powershell
-.\test-api.ps1 demo-tg-sam-backend appuser@aws.local 'AppP@ssw0rd!'
+.\test-api.ps1 demo-tg-sam-backend appuser@aws.local 'AppP@ssw0rd!' ap-southeast-1
 ```
 
 The script reads `ApiUrl` and `CognitoAppClientId` from the stack outputs automatically. It tests all CRUD operations, 404 handling, authentication/authorization, and CORS (10 tests total).
