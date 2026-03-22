@@ -173,8 +173,12 @@ sam build
 sam deploy
 ```
 
-To change parameter values, run `sam build
-sam deploy --guided` again.
+To change parameter values:
+
+```bash
+sam build
+sam deploy --guided
+```
 
 ## API routes
 
@@ -222,7 +226,8 @@ demo-sam-backend-starter/
 If `sam build` fails due to platform-specific dependency issues, use Docker to build inside a container that matches the Lambda environment:
 
 ```bash
-sam build --use-container && sam deploy
+sam build --use-container
+sam deploy
 ```
 
 This requires [Docker](https://docs.docker.com/get-docker/) to be installed and running.
