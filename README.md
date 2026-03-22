@@ -32,9 +32,8 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 ## Prerequisites (local machine)
 
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-- [Docker](https://docs.docker.com/get-docker/) (required for `sam build --use-container`)
+- Python 3.12
 - AWS CLI configured with credentials
-- **Windows users**: Use PowerShell version of test script (`test-api.ps1`)
 
 ## AWS credentials
 
@@ -94,13 +93,13 @@ Request the following from your infrastructure team:
 ### Step 3: Deploy (first time)
 
 ```bash
-sam build --use-container && sam deploy --guided
+sam build && sam deploy --guided
 ```
 
 To add custom tags to all resources in the stack:
 
 ```bash
-sam build --use-container && sam deploy --guided --tags "auto-delete=no team=platform"
+sam build && sam deploy --guided --tags "auto-delete=no team=platform"
 ```
 
 Tags are saved to `samconfig.toml` and reused on subsequent deploys.
@@ -167,10 +166,10 @@ The template includes a working CRUD API for an `items` table as a starting poin
 After making changes, redeploy:
 
 ```bash
-sam build --use-container && sam deploy
+sam build && sam deploy
 ```
 
-To change parameter values, run `sam build --use-container && sam deploy --guided` again.
+To change parameter values, run `sam build && sam deploy --guided` again.
 
 ## API routes
 
@@ -213,13 +212,23 @@ demo-sam-backend-starter/
 
 ## Troubleshooting
 
+**Build fails with dependency errors**
+
+If `sam build` fails due to platform-specific dependency issues, use Docker to build inside a container that matches the Lambda environment:
+
+```bash
+sam build --use-container && sam deploy
+```
+
+This requires [Docker](https://docs.docker.com/get-docker/) to be installed and running.
+
 **Deploy fails with ROLLBACK_COMPLETE**
 
 If a previous deploy failed, the stack is left in `ROLLBACK_COMPLETE` state. Delete it first, then redeploy:
 
 ```bash
 sam delete --stack-name <your-stack-name> --region <region>
-sam build --use-container && sam deploy --guided
+sam build && sam deploy --guided
 ```
 
 **Docker is unreachable**
