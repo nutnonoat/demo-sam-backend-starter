@@ -31,9 +31,9 @@ Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
 
 ## Prerequisites (local machine)
 
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) configured with credentials
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 - Python 3.12
-- AWS CLI configured with credentials
 
 ## AWS credentials
 
