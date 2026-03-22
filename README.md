@@ -93,13 +93,15 @@ Request the following from your infrastructure team:
 ### Step 3: Deploy (first time)
 
 ```bash
-sam build && sam deploy --guided
+sam build
+sam deploy --guided
 ```
 
 To add custom tags to all resources in the stack:
 
 ```bash
-sam build && sam deploy --guided --tags "auto-delete=no team=platform"
+sam build
+sam deploy --guided --tags "auto-delete=no team=platform"
 ```
 
 Tags are saved to `samconfig.toml` and reused on subsequent deploys.
@@ -167,10 +169,12 @@ The template includes a working CRUD API for an `items` table as a starting poin
 After making changes, redeploy:
 
 ```bash
-sam build && sam deploy
+sam build
+sam deploy
 ```
 
-To change parameter values, run `sam build && sam deploy --guided` again.
+To change parameter values, run `sam build
+sam deploy --guided` again.
 
 ## API routes
 
@@ -229,7 +233,8 @@ If a previous deploy failed, the stack is left in `ROLLBACK_COMPLETE` state. Del
 
 ```bash
 sam delete --stack-name <your-stack-name> --region <region>
-sam build && sam deploy --guided
+sam build
+sam deploy --guided
 ```
 
 **Docker is unreachable**
