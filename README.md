@@ -132,7 +132,7 @@ aws secretsmanager update-secret \
 
 ### Step 6: Test
 
-Run the included test script:
+Run the included test script. The command is also available in the stack outputs from Step 4 (`TestApiCommandBash` / `TestApiCommandPowerShell`):
 
 **Bash (macOS/Linux):**
 ```bash
