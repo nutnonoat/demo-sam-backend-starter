@@ -97,13 +97,29 @@ sam build
 sam deploy --guided
 ```
 
-To add custom tags to all resources in the stack, add the following line to `samconfig.toml` under `[default.deploy.parameters]`:
+SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
+
+## Adding custom tags
+
+To tag all resources in the stack (e.g., for cost tracking), two options:
+
+**Option 1: Add to `samconfig.toml` (recommended)**
+
+Add this line under `[default.deploy.parameters]` in `samconfig.toml`:
 
 ```toml
 tags = "auto-delete=no team=platform"
 ```
 
-SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
+Tags are applied automatically on every `sam deploy`.
+
+**Option 2: Pass `--tags` on every deploy**
+
+```bash
+sam deploy --tags "auto-delete=no team=platform"
+```
+
+Note: `--tags` is not saved by `sam deploy --guided`. You must pass it every time or use Option 1.
 
 ### Step 4: Gather deployment outputs
 
