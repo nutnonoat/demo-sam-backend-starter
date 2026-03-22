@@ -59,7 +59,6 @@ If using the default profile, no `AWS_PROFILE` is needed.
 | `Project` | Yes | - | Application name for resource naming |
 | `Environment` | No | `dev` | `dev`, `staging`, or `prod` |
 | `CognitoUserPoolId` | Yes | - | Shared Cognito User Pool ID |
-| `CognitoUserPoolArn` | Yes | - | Shared Cognito User Pool ARN |
 | `AllowedCognitoGroup` | Yes | - | Cognito group allowed to access this app |
 | `VpcId` | Yes | - | VPC ID for Lambda |
 | `PrivateSubnetIds` | Yes | - | Comma-separated private subnet IDs |

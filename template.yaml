@@ -17,9 +17,6 @@ Parameters:
   CognitoUserPoolId:
     Type: String
     Description: Centralized Cognito User Pool ID (provided by infra team)
-  CognitoUserPoolArn:
-    Type: String
-    Description: Centralized Cognito User Pool ARN (provided by infra team)
   AllowedCognitoGroup:
     Type: String
     Description: Cognito group name allowed to access this app
