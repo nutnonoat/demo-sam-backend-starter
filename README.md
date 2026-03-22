@@ -99,28 +99,6 @@ sam deploy --guided
 
 SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
 
-## Adding custom tags
-
-To tag all resources in the stack (e.g., for cost tracking), two options:
-
-**Option 1: Add to `samconfig.toml` (recommended)**
-
-Add this line under `[default.deploy.parameters]` in `samconfig.toml`:
-
-```toml
-tags = "auto-delete=no team=platform"
-```
-
-Tags are applied automatically on every `sam deploy`.
-
-**Option 2: Pass `--tags` on every deploy**
-
-```bash
-sam deploy --tags "auto-delete=no team=platform"
-```
-
-Note: `--tags` is not saved by `sam deploy --guided`. You must pass it every time or use Option 1.
-
 ### Step 4: Gather deployment outputs
 
 Get stack outputs:
@@ -169,6 +147,28 @@ Example:
 ```
 
 The script reads `ApiUrl` and `CognitoAppClientId` from the stack outputs automatically. It tests all CRUD operations, 404 handling, authentication/authorization, and CORS (10 tests total).
+
+## Deployment with custom tags
+
+To tag all resources in the stack (e.g., for cost tracking), two options:
+
+**Option 1: Add to `samconfig.toml` (recommended)**
+
+Add this line under `[default.deploy.parameters]` in `samconfig.toml`:
+
+```toml
+tags = "auto-delete=no team=platform"
+```
+
+Tags are applied automatically on every `sam deploy`.
+
+**Option 2: Pass `--tags` on every deploy**
+
+```bash
+sam deploy --tags "auto-delete=no team=platform"
+```
+
+Note: `--tags` is not saved by `sam deploy --guided`. You must pass it every time or use Option 1.
 
 ## Building your own API
 
