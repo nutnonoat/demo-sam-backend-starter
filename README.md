@@ -106,7 +106,21 @@ Tags are saved to `samconfig.toml` and reused on subsequent deploys.
 
 SAM will prompt you for each parameter one by one. Your answers are saved to `samconfig.toml` automatically.
 
-### Step 4: Update RDS credentials in Secrets Manager
+### Step 4: Gather deployment outputs
+
+Get stack outputs:
+```bash
+aws cloudformation describe-stacks --stack-name <your-stack-name> --query "Stacks[0].Outputs"
+```
+
+Note these key outputs:
+- `ApiUrl` — API endpoint for testing and frontend integration
+- `CognitoAppClientId` — for Cognito authentication
+- `RdsSecretArn` — Secrets Manager secret to update with RDS credentials
+- `LambdaSecurityGroupId` — Lambda SG (for reference)
+- `TestApiCommandBash` / `TestApiCommandPowerShell` — copy and paste to run tests
+
+### Step 5: Update RDS credentials in Secrets Manager
 
 The template creates a secret with placeholder values. Update it with the actual credentials from your infra team via CLI or AWS Console (Secrets Manager > select secret > Retrieve secret value > Edit):
 
@@ -115,19 +129,6 @@ aws secretsmanager update-secret \
   --secret-id <Project>-<Environment>/rds-credentials \
   --secret-string '{"host":"my-rds.xxx.rds.amazonaws.com","port":5432,"dbname":"appdb","username":"myapp_user","password":"actual-password"}'
 ```
-
-### Step 5: Post-deploy setup
-
-1. Get stack outputs:
-   ```bash
-   aws cloudformation describe-stacks --stack-name <your-stack-name> --query "Stacks[0].Outputs"
-   ```
-2. Note these key outputs:
-   - `ApiUrl` — API endpoint for testing and frontend integration
-   - `CognitoAppClientId` — for Cognito authentication
-   - `RdsSecretArn` — Secrets Manager secret to update with RDS credentials
-   - `LambdaSecurityGroupId` — Lambda SG (for reference)
-   - `TestApiCommandBash` / `TestApiCommandPowerShell` — copy and paste to run tests
 
 ### Step 6: Test
 
