@@ -122,11 +122,11 @@ Note these key outputs:
 
 ### Step 5: Update RDS credentials in Secrets Manager
 
-The template creates a secret with placeholder values. Update it with the actual credentials from your infra team via CLI or AWS Console (Secrets Manager > select secret > Retrieve secret value > Edit):
+The template creates a secret with placeholder values. Use the `RdsSecretArn` from Step 4 outputs and update it with the actual credentials from your infra team via CLI or AWS Console (Secrets Manager > select secret > Retrieve secret value > Edit):
 
 ```bash
 aws secretsmanager update-secret \
-  --secret-id <Project>-<Environment>/rds-credentials \
+  --secret-id <RdsSecretArn from Step 4> \
   --secret-string '{"host":"my-rds.xxx.rds.amazonaws.com","port":5432,"dbname":"appdb","username":"myapp_user","password":"actual-password"}'
 ```
 
