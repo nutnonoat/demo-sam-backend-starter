@@ -108,7 +108,7 @@ SAM will prompt you for each parameter one by one. Your answers are saved to `sa
 
 ### Step 4: Update RDS credentials in Secrets Manager
 
-The template creates a secret with placeholder values. Update it with the actual credentials from your infra team:
+The template creates a secret with placeholder values. Update it with the actual credentials from your infra team via CLI or AWS Console (Secrets Manager > select secret > Retrieve secret value > Edit):
 
 ```bash
 aws secretsmanager update-secret \
