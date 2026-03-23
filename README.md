@@ -6,8 +6,10 @@ A SAM-based backend starter kit for teams modernizing to serverless on AWS.
 
 ```
 Client → API Gateway (REST API) → Lambda (Python 3.12) → RDS PostgreSQL
-              ↓
-       Lambda Authorizer → validates Cognito JWT + group membership
+              ↓                         ↓
+       Lambda Authorizer         Secrets Manager
+       validates Cognito         (RDS credentials)
+       JWT + group membership
 ```
 
 ## What's included
