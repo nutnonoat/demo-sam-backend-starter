@@ -72,7 +72,7 @@ def handler(event, context):
         )
 
         # Validate token_use
-        if claims.get("token_use") not in ("id", "access"):
+        if claims.get("token_use") != "id":
             return _generate_policy("anonymous", "Deny", method_arn)
 
         # Check group membership
