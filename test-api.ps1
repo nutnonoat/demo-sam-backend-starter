@@ -81,6 +81,28 @@ try { $Res = Invoke-RestMethod -Uri "$ApiUrl/items" -Headers @{ "Authorization" 
 $Res
 Check "Fake token denied" "not authorized|Unauthorized" $Res
 
+Write-Host "`n=== 9. CORS preflight (Should return CORS headers) ==="
+try {
+    $Res = Invoke-WebRequest -Uri "$ApiUrl/items" -Method OPTIONS -Headers @{ "Origin" = "https://example.com"; "Access-Control-Request-Method" = "POST" }
+    $CorsHeader = $Res.Headers["Access-Control-Allow-Origin"]
+    Write-Host "  Access-Control-Allow-Origin: $CorsHeader"
+    Check "Preflight returns Allow-Origin" "." $CorsHeader
+} catch {
+    Write-Host "  FAIL: Preflight request failed: $_" -ForegroundColor Red
+    $Fail++
+}
+
+Write-Host "`n=== 10. CORS on GET response (Should return CORS headers) ==="
+try {
+    $Res = Invoke-WebRequest -Uri "$ApiUrl/items" -Headers @{ "Authorization" = "Bearer $Token"; "Origin" = "https://example.com" }
+    $CorsHeader = $Res.Headers["Access-Control-Allow-Origin"]
+    Write-Host "  Access-Control-Allow-Origin: $CorsHeader"
+    Check "GET response returns Allow-Origin" "." $CorsHeader
+} catch {
+    Write-Host "  FAIL: GET request failed: $_" -ForegroundColor Red
+    $Fail++
+}
+
 Write-Host "`n================================"
 Write-Host "Results: $Pass passed, $Fail failed"
 Write-Host "================================"
